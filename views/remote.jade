@@ -21,9 +21,25 @@ block head
          socket.emit('video',{action:"quit"});
       }
 
+      function SearchController($scope) {
+
+         $scope.searchYouTube = function() {
+            var terms = $scope.searchText;
+            socket.emit('search',{query:terms});
+         }
+
+      }
+
 block content
    h1= title
    p Welcome to #{title} noob
-   input#play.button(type='button', value='Play' onclick="playVideo();")
-   input#pause.button(type='button', value='Pause' onclick="pauseVideo();")
-   input#stop.button(type='button', value='Stop' onclick="quitVideo();")
+   input#play(class='btn btn-primary' type='button', value='Play' onclick="playVideo();")
+   input#pause(class='btn btn-primary' type='button', value='Pause' onclick="pauseVideo();")
+   input#stop(class='btn btn-primary' type='button', value='Stop' onclick="quitVideo();")
+
+   <hr>
+
+   #search(ng-controller="SearchController")
+      form(ng-submit="searchYouTube()")
+         input(type="text" ng-model="searchText"  size="30" placeholder="Search YouTube for a vidsky")
+         input(class="btn btn-primary" type="submit" value="DO IT")

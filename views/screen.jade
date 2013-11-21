@@ -4,14 +4,43 @@ block head
    script(src="/socket.io/socket.io.js")
    script.
       var socket = io.connect('http://raspy.local:9999');
+      var _waitingString = "Search for a vid using the remote";
+      var _loading = _waitingString;
    
       socket.on('connect', function(data){
          socket.emit('screen');
       });
    
-      socket.on("loading", function(data){
+      socket.on('loading', function(data){
+         var scope = angular.element($("#loading")).scope();
+         scope.$apply(function(){
+            scope.loading = "loading video now...";
+         });
       });  
+
+      socket.on('playing', function(data){
+         var scope = angular.element($("#loading")).scope();
+         scope.$apply(function(){
+            scope.loading = "video playing";
+         });
+      });  
+
+
+      socket.on('done', function(data){
+         var scope = angular.element($("#loading")).scope();
+         scope.$apply(function(){
+            scope.loading = _waitingString;
+         });
+      });  
+
+      function LoadingController($scope) {
+         $scope.loading = _loading;
+      }
 
 block content
    h1= title
    p Welcome to #{title} noob
+
+   #loading(ng-controller="LoadingController")
+      span {{loading}}
+      

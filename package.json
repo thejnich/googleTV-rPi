@@ -10,6 +10,7 @@
       "express": "3.4.4",
       "socket.io":"*",
       "omxcontrol":"*",
-      "jade":"*"
+      "jade":"*",
+      "request":"*"
    }
 }

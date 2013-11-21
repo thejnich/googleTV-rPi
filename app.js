@@ -1,12 +1,14 @@
 var express = require('express')
 var app = express();
 
-var server = require('http').createServer(app);
+var http = require('http')
+var server = http.createServer(app);
 
 var path = require('path');
 var io = require('socket.io').listen(server);
 var spawn = require('child_process').spawn;
 var omx = require('omxcontrol');
+var querystring = require("querystring");
 
 
 // all environments
@@ -29,15 +31,15 @@ if ('development' == app.get('env')) {
 
 // Routes
 app.get('/', function (req, res) {
-   res.render('index', { title: 'Index' });
+   res.render('remote', { title: 'rPiTV-Remote' });
 });
 
 app.get('/screen', function (req, res) {
-   res.render('screen', { title: 'Screen' });
+   res.render('screen', { title: 'rPiTV-Screen' });
 });
 
 app.get('/remote', function (req, res) {
-   res.render('remote', { title: 'Remote' });
+   res.render('remote', { title: 'rPiTV-Remote' });
 });
 
 
@@ -72,19 +74,23 @@ io.sockets.on('connection', function (socket) {
 
    socket.on("video", function(data){
       if( data.action === "play"){
+         playVideo(data.video_id);
+         /*
          var id = data.video_id,
          url = "http://www.youtube.com/watch?v="+id;
 
          var runShell = new run_shell('youtube-dl',['-o','%(id)s.%(ext)s','-f','/18/22',url],
             function (me, buffer) { 
                me.stdout += buffer.toString();
-               socket.emit("loading",{output: me.stdout});
+               ss.emit("loading",{output: me.stdout});
                console.log(me.stdout)
             },
             function () { 
                //child = spawn('omxplayer',[id+'.mp4']);
+               ss.emit("playing");
                omx.start(id+'.mp4');
          });
+         */
       }    
       else if( data.action === "pause"){
          console.log("pause");
@@ -92,12 +98,48 @@ io.sockets.on('connection', function (socket) {
       }
       else if( data.action === "quit"){
          console.log("quit");
+         ss.emit("done");
          omx.quit();
       }
    });
 
+   socket.on("search", function(data){
+      console.log(data.query.split(" "));
+      var queryString = "http://gdata.youtube.com/feeds/api/videos\?max-results=1&" + querystring.stringify(
+         { prettyprint: true, hd: true, v: 2, alt: 'json', q: data.query.split(" ").join('+') });
+      console.log(queryString);
+
+      var request = require('request');
+      request(queryString, function (error, response, body) {
+         if (!error && response.statusCode == 200) {
+            var json = JSON.parse(body);
+            console.log(json.feed.entry[0]);
+            var video_id = json.feed.entry[0]['media$group']['yt$videoid']['$t'];
+            playVideo(video_id);
+         }
+      });
+   });
+
 });
 
+function playVideo(id) {
+
+   console.log("Attempting to load and play id: "+id);
+
+   url = "http://www.youtube.com/watch?v="+id;
+
+   var runShell = new run_shell('youtube-dl',['-o','%(id)s.%(ext)s','-f','/18/22',url],
+         function (me, buffer) { 
+            me.stdout += buffer.toString();
+            ss.emit("loading",{output: me.stdout});
+            console.log(me.stdout)
+         },
+         function () { 
+            //child = spawn('omxplayer',[id+'.mp4']);
+            ss.emit("playing");
+            omx.start(id+'.mp4');
+         });
+}
 
 // Run and pipe shell script output 
 function run_shell(cmd, args, cb, end) {
