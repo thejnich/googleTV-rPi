@@ -1,15 +1,16 @@
 extends layout
 
-script(src="/socket.io/socket.io.js")
-script.
-   var socket = io.connect('http://raspy.local:8080');
-
-   socket.on('connect', function(data){
-      socket.emit('screen');
-   });
-
-   socket.on("loading", function(data){
-   });  
+block head
+   script(src="/socket.io/socket.io.js")
+   script.
+      var socket = io.connect('http://raspy.local:9999');
+   
+      socket.on('connect', function(data){
+         socket.emit('screen');
+      });
+   
+      socket.on("loading", function(data){
+      });  
 
 block content
    h1= title

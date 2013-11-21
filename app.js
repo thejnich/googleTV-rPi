@@ -1,11 +1,13 @@
 var express = require('express')
+var app = express();
+
 var server = require('http').createServer(app);
+
 var path = require('path');
 var io = require('socket.io').listen(server);
 var spawn = require('child_process').spawn;
 var omx = require('omxcontrol');
 
-var app = express();
 
 // all environments
 app.set('port', process.env.TEST_PORT || 9999);
@@ -16,6 +18,7 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
+app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(omx());
 
@@ -26,20 +29,15 @@ if ('development' == app.get('env')) {
 
 // Routes
 app.get('/', function (req, res) {
-   //res.sendfile(__dirname + '/public/remote.html');
-   //res.render('index', { title: 'Index' });
-   res.set('Content-Type', 'text/html');
-   res.send('hello index');
+   res.render('index', { title: 'Index' });
 });
 
 app.get('/screen', function (req, res) {
-   //res.sendfile(__dirname + '/public/screen.html');
-   //res.render('screen', { title: 'Screen' });
+   res.render('screen', { title: 'Screen' });
 });
 
 app.get('/remote', function (req, res) {
-   //res.sendfile(__dirname + '/public/remote.html');
-   //res.render('remote', { title: 'Remote' });
+   res.render('remote', { title: 'Remote' });
 });
 
 

@@ -1,24 +1,25 @@
 extends layout
 
-script(src="/socket.io/socket.io.js")
-script.
-   var socket = io.connect('http://raspy.local:8080');
-   socket.on('connect', function(data){
-      socket.emit('remote');
-   });
-
-   socket.on("loading", function(data){
-   });  
-
-   function playVideo() {
-      socket.emit('video',{action:"play", video_id:"2REkZG-dhHc"});
-   }
-   function pauseVideo() {
-      socket.emit('video',{action:"pause"});
-   }
-   function quitVideo() {
-      socket.emit('video',{action:"quit"});
-   }
+block head
+   script(src="/socket.io/socket.io.js")
+   script.
+      var socket = io.connect('http://raspy.local:9999');
+      socket.on('connect', function(data){
+         socket.emit('remote');
+      });
+   
+      socket.on("loading", function(data){
+      });  
+   
+      function playVideo() {
+         socket.emit('video',{action:"play", video_id:"2REkZG-dhHc"});
+      }
+      function pauseVideo() {
+         socket.emit('video',{action:"pause"});
+      }
+      function quitVideo() {
+         socket.emit('video',{action:"quit"});
+      }
 
 block content
    h1= title
