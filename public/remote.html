@@ -1,0 +1,9 @@
+<script src="/socket.io/socket.io.js"> </script>
+<script>
+   var socket = io.connect('http://raspy.local:8080');
+   socket.on('connect', function(data){
+      socket.emit('remote');
+   });
+</script>
+
+Hello there from remote.html

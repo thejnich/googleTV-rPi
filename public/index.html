@@ -1,0 +1,27 @@
+<script src="/socket.io/socket.io.js"> </script>
+<script>
+   var socket = io.connect('http://raspy.local:8080');
+
+   socket.on('connect', function(data){
+      socket.emit('screen');
+   });
+
+   socket.on("loading", function(data){
+      console.log(data);
+   });  
+
+   function playVideo() {
+      socket.emit('video',{action:"play", video_id:"2REkZG-dhHc"});
+   }
+   function pauseVideo() {
+      socket.emit('video',{action:"pause"});
+   }
+   function quitVideo() {
+      socket.emit('video',{action:"quit"});
+   }
+</script>
+
+Hello there from index.html<br />
+<input type="button" id="play" value="Play" onclick="playVideo();" />
+<input type="button" id="pause" value="Pause" onclick="pauseVideo();" />
+<input type="button" id="stop" value="Stop" onclick="quitVideo();" />
