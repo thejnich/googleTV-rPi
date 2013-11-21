@@ -7,8 +7,9 @@
    },
 
    "dependencies": {
-      "express": "3.1.1",
-      "socket.io":"0.9.14",
-      "omxcontrol":"*"
+      "express": "3.4.4",
+      "socket.io":"*",
+      "omxcontrol":"*",
+      "jade":"*"
    }
 }
