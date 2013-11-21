@@ -3,6 +3,7 @@ extends layout
 block head
    script(src="/socket.io/socket.io.js")
    script.
+      var _video_id;
       var socket = io.connect('http://raspy.local:9999');
       socket.on('connect', function(data){
          socket.emit('remote');
@@ -12,7 +13,10 @@ block head
       });  
    
       function playVideo() {
-         socket.emit('video',{action:"play", video_id:"2REkZG-dhHc"});
+         if(!!_video_id)
+         {
+            socket.emit('video',{action:"play", video_id:_video_id});
+         }
       }
       function pauseVideo() {
          socket.emit('video',{action:"pause"});
@@ -21,14 +25,47 @@ block head
          socket.emit('video',{action:"quit"});
       }
 
-      function SearchController($scope) {
+      function SearchController($scope, $http) {
 
          $scope.searchYouTube = function() {
             var terms = $scope.searchText;
-            socket.emit('search',{query:terms});
-         }
 
+            var maxitems = 10;
+
+            var query = 'https://gdata.youtube.com/feeds/api/videos\?max-results\='+maxitems+'\&hd\&v\=2\&alt\=json\&safesearch\=none\&q\='+terms.split(" ").join('+');
+            $scope.query = query;
+
+            $http({method: 'GET', url: query}).
+               success(function(data, status, headers, config) {
+
+                     var entries = data.feed.entry;
+
+                     $scope.results = entries;
+
+                     var index = Math.floor(Math.random() * entries.length);
+
+                     var title = entries[index].title['$t'];
+                     var video_id = entries[index]['media$group']['yt$videoid']['$t'];
+
+                     $scope.video = title +" ["+ entries[index]['media$group']['yt$duration']['seconds'] + "]";
+
+                     _video_id = video_id;
+               }).
+            error(function(data, status, headers, config) {
+               $scope.result = "Error: "+status;
+            });
+         };
+
+         $scope.selectVideo = function(index) {
+            var title = $scope.results[index].title['$t'];
+            var video_id = $scope.results[index]['media$group']['yt$videoid']['$t'];
+
+            $scope.video = title +" ["+ $scope.results[index]['media$group']['yt$duration']['seconds'] + "]";
+
+            _video_id = $scope.results[index]['media$group']['yt$videoid']['$t'];
+         };
       }
+
 
 block content
    h1= title
@@ -43,3 +80,13 @@ block content
       form(ng-submit="searchYouTube()")
          input(type="text" ng-model="searchText"  size="30" placeholder="Search YouTube for a vidsky")
          input(class="btn btn-primary" type="submit" value="DO IT")
+      
+      #results
+         | Hit Play for: {{video}}
+         <hr>
+         <li ng-repeat="result in results">
+         <a href="" ng-click="selectVideo($index)">{{result.title['$t']}}
+         </li>
+      <hr>
+      #query
+         {{query}}

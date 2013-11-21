@@ -104,6 +104,7 @@ io.sockets.on('connection', function (socket) {
    });
 
    socket.on("search", function(data){
+      /*
       console.log(data.query.split(" "));
       var queryString = "http://gdata.youtube.com/feeds/api/videos\?max-results=1&" + querystring.stringify(
          { prettyprint: true, hd: true, v: 2, alt: 'json', q: data.query.split(" ").join('+') });
@@ -118,6 +119,7 @@ io.sockets.on('connection', function (socket) {
             playVideo(video_id);
          }
       });
+      */
    });
 
 });
